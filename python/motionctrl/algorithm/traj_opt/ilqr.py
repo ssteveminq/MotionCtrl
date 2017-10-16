@@ -22,10 +22,34 @@ class iLQR(object):
             fx, fu, cx, cu, cxx, cxu, cuu = self.dynCstDiff(traj)
 
         ### Step 2 : Backward pass, compute optimal control law and cost to go
+        diverge, Vx, Vxx, k, K, dV = self.backward_pass(cx, cu, cxx,
+                                                        cxu, cuu, fx, fu)
         ### Step 3 : Line-search to find new control sequence, trajectory, cost
         ### Step 4 : Accept Step (or not) and print status
         pass
     # return
+
+    def backward_pass(self, cx, cu, cxx, cxu, cuu, fx, fu, lamb=1, reg_type=1):
+        """
+        Execute backward pass along trajectory
+        Args:
+            cx, cu, cxx, cxu, cuu, fx, fu
+            lamb:
+            reg_type:
+        Returns:
+
+
+        """
+        k = np.zeros([self.agent.nu, self.params.iterations])
+        K = np.zeros([self.agent.nu, self.agent.nx, self.params.iterations])
+        Vx = np.zeros([self.agent.nx, self.params.iterations+1])
+        Vxx = np.zeros([self.agent.nx, self.agent.nx, self.params.iterations+1])
+        dV = np.array([0, 0])
+        Vx[:,-1] = cx[:, -1]
+        Vxx[:,:,-1] = cxx[:,:,-1]
+        for i in np.arange(self.params.iterations-1, -1, -1):
+
+        return diverge, Vx, Vxx, k, K, dV
 
     def forward_pass(self, x0, policy, noisy=False):
         """
