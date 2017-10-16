@@ -22,6 +22,8 @@ class iLQR(object):
             fx, fu, cx, cu, cxx, cxu, cuu = self.dynCstDiff(traj)
 
         ### Step 2 : Backward pass, compute optimal control law and cost to go
+        ### Step 3 : Line-search to find new control sequence, trajectory, cost
+        ### Step 4 : Accept Step (or not) and print status
         pass
     # return
 
