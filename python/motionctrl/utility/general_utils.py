@@ -37,3 +37,20 @@ def finite_differences(func, inputs, func_output_shape=(), epsilon=2**(-17)):
         diff = (obj_d1 - obj_d2) / (2 * epsilon)
         gradient[idx] += diff
     return gradient
+
+def deleteRowCol(A, idx_array):
+    """
+    Delete rows and cols of 2D array
+    Args:
+        A: 2D numpy array
+        idx_array: 1D numpy boolean array
+                   Rows and Cols corresponding to 1 is deleted
+    Returns:
+        A_del : Deleted 2D array
+    """
+    A_del = np.copy(A)
+    idx = (np.where(idx_array==True))[0]
+    for i in np.flip(idx, axis=0):
+        A_del = np.delete(np.delete(A_del, i, axis=0), i, axis=1)
+    return A_del
+
