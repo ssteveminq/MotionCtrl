@@ -11,5 +11,6 @@ print(np.where(delete==True))
 # print(a[delete])
 
 '''
-for it in range(500):
-    print(it)
+a=np.array([1,2,3,4,5,6,7,8,9])
+print(a[:-1])
+

@@ -7,7 +7,14 @@ class iLQR(object):
     def __init__(self, agent, params):
         self.agent = agent
         self.params = params
+        ## Optimizer option
         self.alpha = 10 ** np.arange(0, -3.5, -0.5)
+        self.lamb = 1
+        self.dlamb = 1
+        self.lambdaFactor = 1.6
+        self.lambdaMin = 1e-6
+        self.tolGrad = 1e-4
+        self.maxIter = 500
 
     def run(self, u0):
         """
@@ -17,21 +24,85 @@ class iLQR(object):
         Returns:
 
         """
+        lamb = self.lamb
+        dlamb = self.dlamb
         u = u0
-        ### Step 1 : Forword step, differentiate dynamics and cost along new trajectory
-        traj_list = self.forward_pass(self.agent.reset(), u)
-        for traj in traj_list:
-            fx, fu, cx, cu, cxx, cxu, cuu = self.dynCstDiff(traj)
+        for it in range(self.maxIter):
+            ### Step 1 : Forword step, differentiate dynamics and cost along new trajectory
+            traj_list = self.forward_pass(self.agent.reset(), u, lims=self.agent.ctrl_lims)
+            for traj in traj_list:
+                fx, fu, cx, cu, cxx, cxu, cuu = self.dynCstDiff(traj)
+            ### Step 2 : Backward pass, compute optimal control law and cost to go
+            Vx, Vxx, l, L, dV = self.backward_pass(cx, cu, cxx, \
+                                                            cxu, cuu, fx, fu, \
+                                                            lamb, \
+                                                            self.agent.ctrl_lims, u)
+            g_norm = np.mean(np.max(np.abs(l) / (np.abs(u)+1), axis=0))
 
-        ### Step 2 : Backward pass, compute optimal control law and cost to go
-        Vx, Vxx, k, K, dV = self.backward_pass(cx, cu, cxx, \
-                                                        cxu, cuu, fx, fu, \
-                                                        1, \
-                                                        self.agent.ctrl_lims, u)
-        ### Step 3 : Line-search to find new control sequence, trajectory, cost
-        ### Step 4 : Accept Step (or not) and print status
-        pass
+            if (g_norm < self.tolGrad) and (lamb < 1e-5):
+                dlamb = np.min(dlamb / self.lambdaFactor, 1 / self.lambdaFactor)
+                if lamb > self.lambdaMin:
+                    lamb *= dlamb
+                else:
+                    lamb = 0
+                break
+            ### Step 3 : Line-search to find new control sequence, trajectory, cost
+            for alpha in self.alpha:
+                new_traj_list = self.forward_pass(self.agent.reset(), u+l*alpha,
+                                    L, traj_list[0]['state_list'][:,:-1])
+                dcost = np.sum(traj_list[0]['cost_list']-new_traj_list[0]['cost_list'])
+                expected = -alpha * (dV[0] + alpha * dV[1])
+                if expected > 0:
+                    z = dcost / expected
+                else:
+                    z = np.sign(dcost)
+                    raise ValueError("non-positive expected reduction: shouldn't occur")
+                if z > self.zMin:
+                    fwdPassDone = 1
+                    break
+            ### Step 4 : Accept Step (or not) and print status
+            pass
     # return
+
+    def forward_pass(self, x0, policy, L=np.array([]),
+                      x=np.array([]), lims=np.array([]),
+                      noisy=False):
+        """
+        Roll out through dynamics given x0 and poliy
+        Args:
+            x0: Initial state
+            policy: Policy fn or input array
+            L: K which is multiplied with state
+            x: intermidiate states
+            lims: input limits
+            noisy: Add Gaussian noise
+        Returns:
+            traj: Return trajectory list composed of [state, input, cost]
+        """
+
+        traj = []
+        xnew = np.zeros([self.agent.nx, self.params.iterations+1])
+        xnew[:, 0] = x0
+        cnew = np.zeros(self.params.iterations+1)
+        if isinstance(policy, np.ndarray):
+            for i in range(self.params.num_samples):
+                if noisy:
+                    policy = generate_noise(policy)
+                unew = np.zeros([self.agent.nu, self.params.iterations+1])
+                unew[:,-1] = np.nan
+                for t in range(self.params.iterations):
+                    unew[:,t] = policy[:,t]
+                    if L.shape[0]:
+                        dx = xnew[:,t] - x[:,t]
+                        unew[:,t] += np.dot(L[:,:,t], dx)
+                    if lims.shape[0]:
+                        unew[:,t] = np.clip(unew[:,t], lims[:,0], lims[:,1])
+                    xnew[:, t+1], cnew[t], _ = self.agent.step(xnew[:,t], unew[:,t])
+                _, cnew[-1], _ = self.agent.step(xnew[:,-1], unew[:,-1])
+                traj.append({'state_list':xnew, 'input_list': unew, 'cost_list':cnew})
+        else:
+            pass
+        return traj
 
     def backward_pass(self, cx, cu, cxx, cxu, cuu, fx, fu, lamb, \
                       ctrl_lims, u):
@@ -85,40 +156,6 @@ class iLQR(object):
             K[:,:,i] = K_i
 
         return Vx, Vxx, k, K, dV
-
-    def forward_pass(self, x0, policy, noisy=False):
-        """
-        Roll out through dynamics given x0 and poliy
-        Args:
-            x0: Initial state
-            policy: Policy fn or input array
-            noisy: Add Gaussian noise
-        Returns:
-            traj: Return trajectory list composed of [state, input, cost]
-        """
-        traj = []
-        state = np.zeros([self.agent.nx, self.params.iterations+1])
-        state[:, 0] = x0
-        cost = np.zeros(self.params.iterations+1)
-        if isinstance(policy, np.ndarray):
-            for i in range(self.params.num_samples):
-                if noisy:
-                    policy = generate_noise(policy)
-                u = np.zeros([self.agent.nu, self.params.iterations+1])
-                u[:, -1] = np.nan
-                u[:, :-1] = policy
-                for alpha in self.alpha:
-                    for t in range(self.params.iterations):
-                        state[:, t+1], cost[t], _ = self.agent.step(state[:, t], u[:, t])
-                    _, cost[-1], _ = self.agent.step(state[:,-1], u[:,-1])
-                    if not isDiverge(state, self.agent.thres):
-                        break
-                    if alpha == alpha[-1]:
-                        raise ValueError("Trajectory is Diverged")
-                traj.append({'state_list':state, 'input_list': u, 'cost_list':cost})
-        else:
-            pass
-        return traj
 
     def fn_J_dyn(self, xu):
         """
@@ -189,4 +226,31 @@ class iLQR(object):
         cuu = J_cstcst[4:6, 4:6, :]
 
         return fx, fu, cx, cu, cxx, cxu, cuu
+
+    '''
+    def forward_pass2(self, x0, policy, noisy=False):
+        traj = []
+        state = np.zeros([self.agent.nx, self.params.iterations+1])
+        state[:, 0] = x0
+        cost = np.zeros(self.params.iterations+1)
+        if isinstance(policy, np.ndarray):
+            for i in range(self.params.num_samples):
+                if noisy:
+                    policy = generate_noise(policy)
+                u = np.zeros([self.agent.nu, self.params.iterations+1])
+                u[:, -1] = np.nan
+                u[:, :-1] = policy
+                for alpha in self.alpha:
+                    for t in range(self.params.iterations):
+                        state[:, t+1], cost[t], _ = self.agent.step(state[:, t], u[:, t])
+                    _, cost[-1], _ = self.agent.step(state[:,-1], u[:,-1])
+                    if not isDiverge(state, self.agent.thres):
+                        break
+                    if alpha == alpha[-1]:
+                        raise ValueError("Trajectory is Diverged")
+                traj.append({'state_list':state, 'input_list': u, 'cost_list':cost})
+        else:
+            pass
+        return traj
+    '''
 
