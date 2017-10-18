@@ -21,8 +21,8 @@ def boxQP(H, g, lower, upper, x0):
         if e == 0:
             x[e] = 0
     maxIter = 100
-    minGrad = 1e-8
-    minRelImprove = 1e-8
+    minGrad = 1e-7
+    minRelImprove = 1e-7
     stepDec = 0.6
     minStep = 1e-22
     Armijo = 0.1
@@ -86,6 +86,9 @@ def boxQP(H, g, lower, upper, x0):
                 break
         x = xc
         value = vc
+    if it >= maxIter:
+        result=1
+
     return x, result, Hfree, free
 
 if __name__ == "__main__":
