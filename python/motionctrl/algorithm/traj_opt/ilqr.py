@@ -8,13 +8,15 @@ class iLQR(object):
         self.agent = agent
         self.params = params
         ## Optimizer option
-        self.alpha = 10 ** np.arange(0, -3.5, -0.5)
-        self.lamb = 1
-        self.dlamb = 1
+        self.alpha = 10.0 ** np.linspace(0.0, -3.0, 11)
+        self.lamb = 1.0
+        self.dlamb = 1.0
         self.lambdaFactor = 1.6
         self.lambdaMin = 1e-6
         self.tolGrad = 1e-4
+        self.tolFun = 1e-7
         self.maxIter = 500
+        self.zMin = 0.0
 
     def run(self, u0):
         """
@@ -27,18 +29,18 @@ class iLQR(object):
         lamb = self.lamb
         dlamb = self.dlamb
         u = u0
+        traj_list = self.forward_pass(self.agent.reset(), u, lims=self.agent.ctrl_lims)
         for it in range(self.maxIter):
             ### Step 1 : Forword step, differentiate dynamics and cost along new trajectory
-            traj_list = self.forward_pass(self.agent.reset(), u, lims=self.agent.ctrl_lims)
             for traj in traj_list:
                 fx, fu, cx, cu, cxx, cxu, cuu = self.dynCstDiff(traj)
             ### Step 2 : Backward pass, compute optimal control law and cost to go
-            Vx, Vxx, l, L, dV = self.backward_pass(cx, cu, cxx, \
-                                                            cxu, cuu, fx, fu, \
-                                                            lamb, \
-                                                            self.agent.ctrl_lims, u)
-            g_norm = np.mean(np.max(np.abs(l) / (np.abs(u)+1), axis=0))
-
+            Vx, Vxx, l, L, dV = self.backward_pass(cx, cu, cxx,
+                                                   cxu, cuu, fx, fu,
+                                                   lamb, self.agent.ctrl_lims,
+                                                   traj_list[0]['input_list'][:,:-1])
+            g_norm = np.mean(np.max(np.abs(l) \
+                    / (np.abs(traj_list[0]['input_list'][:,:-1])+1), axis=0))
             if (g_norm < self.tolGrad) and (lamb < 1e-5):
                 dlamb = np.min(dlamb / self.lambdaFactor, 1 / self.lambdaFactor)
                 if lamb > self.lambdaMin:
@@ -48,8 +50,10 @@ class iLQR(object):
                 break
             ### Step 3 : Line-search to find new control sequence, trajectory, cost
             for alpha in self.alpha:
-                new_traj_list = self.forward_pass(self.agent.reset(), u+l*alpha,
-                                    L, traj_list[0]['state_list'][:,:-1])
+                new_traj_list = self.forward_pass(self.agent.reset(),
+                        traj_list[0]['input_list'][:,:-1]+l*alpha,
+                        L, traj_list[0]['state_list'][:,:-1],
+                        self.agent.ctrl_lims)
                 dcost = np.sum(traj_list[0]['cost_list']-new_traj_list[0]['cost_list'])
                 expected = -alpha * (dV[0] + alpha * dV[1])
                 if expected > 0:
@@ -58,11 +62,19 @@ class iLQR(object):
                     z = np.sign(dcost)
                     raise ValueError("non-positive expected reduction: shouldn't occur")
                 if z > self.zMin:
-                    fwdPassDone = 1
                     break
             ### Step 4 : Accept Step (or not) and print status
-            pass
-    # return
+            dlamb = min(dlamb / self.lambdaFactor, 1.0/self.lambdaFactor)
+            if lamb > self.lambdaMin:
+                lamb *= dlamb
+            else:
+                lamb = 0
+            traj_list = new_traj_list
+            if dcost < self.tolFun:
+                break
+            print("\riteration {}/{} -- cost {} -- reduction {}"\
+                    .format(it, self.maxIter, np.sum(traj_list[0]['cost_list']), dcost))
+        return traj_list, L, Vx, Vxx
 
     def forward_pass(self, x0, policy, L=np.array([]),
                       x=np.array([]), lims=np.array([]),
@@ -154,7 +166,6 @@ class iLQR(object):
             Vxx[:,:,i] = 0.5*(Vxx[:,:,i] + Vxx[:,:,i].T)
             k[:,i] = k_i
             K[:,:,i] = K_i
-
         return Vx, Vxx, k, K, dV
 
     def fn_J_dyn(self, xu):

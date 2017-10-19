@@ -1,6 +1,7 @@
 import numpy as np
 from agent.parking import Parking
 from algorithm.traj_opt.ilqr import iLQR
+import matplotlib.pyplot as plt
 
 class Main(object):
     def __init__(self, params):
@@ -17,7 +18,9 @@ class Main(object):
     def run(self):
         # Run algorithm with arbitrary input
         u0 = 0.1 * np.ones([self.agent.nu, self.params.iterations])
-        self.algorithm.run(u0)
+        traj_list, L, Vx, Vxx = self.algorithm.run(u0)
+        plt.plot(traj_list[0]['state_list'][0], traj_list[0]['state_list'][0], 'o')
+        plt.show()
 
 def main():
     import argparse

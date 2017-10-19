@@ -43,7 +43,7 @@ def boxQP(H, g, lower, upper, x0):
 
         for i in range(n):
             if ((x[i] == lower[i]) and (grad[i] > 0)) or ((x[i] == upper[i]) and (grad[i] < 0)):
-                clamped[i] = 1
+                clamped[i] = True
         free = ~clamped
 
         if clamped.all():
@@ -71,7 +71,7 @@ def boxQP(H, g, lower, upper, x0):
 
         sdotg = np.sum(search*grad)
         if sdotg >= 0:
-            raise ValueError("descent direction is wrong in boxQP")
+            break
         step = 1
         nstep = 0
         xc = np.clip(x+step*search, lower, upper)
