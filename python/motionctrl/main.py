@@ -19,7 +19,7 @@ class Main(object):
         # Run algorithm with arbitrary input
         u0 = 0.1 * np.ones([self.agent.nu, self.params.iterations])
         traj_list, L, Vx, Vxx = self.algorithm.run(u0)
-        plt.plot(traj_list[0]['state_list'][0], traj_list[0]['state_list'][0], 'o')
+        plt.plot(traj_list[0]['state_list'][0,:], traj_list[0]['state_list'][1,:], 'o')
         plt.show()
 
 def main():
