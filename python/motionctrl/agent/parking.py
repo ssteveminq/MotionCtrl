@@ -7,7 +7,7 @@ class Parking(Agent):
         # agent parameters
         self.nx = 4
         self.nu = 2
-        self.x0 = np.array([1.0, 1.0, 4.7124, 0.0])
+        self.x0 = np.array([1.0, 1.0, np.pi*3./2., 0.0])
         self.ctrl_lims = np.array([ [-0.5, 0.5], [-2.0, 2.0] ])
         self.thres = 1e8
         # geometric parameters
@@ -108,10 +108,10 @@ class Parking(Agent):
         isfinal = np.isnan(u[0])
         if isfinal:
             u = np.zeros(self.nu)
-        cu = 0.01*np.array([1, 0.01]) # control cost coefficients
-        cf = np.array([0.1, 0.1, 1, 0.3]) # final cost coefficients
-        pf = np.array([0.01, 0.01, 0.01, 1]) # smoothness scales for final cost
-        cx = 0.001*np.array([1, 1])
+        cu = 0.01*np.array([1.0, 0.01]) # control cost coefficients
+        cf = np.array([0.1, 0.1, 1., 0.3]) # final cost coefficients
+        pf = np.array([0.01, 0.01, 0.01, 1.]) # smoothness scales for final cost
+        cx = 0.001*np.array([1.0, 1.0])
         px = np.array([0.1, 0.1])
         lu = np.dot(cu, u*u)
         if isfinal:

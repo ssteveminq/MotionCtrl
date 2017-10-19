@@ -5,7 +5,7 @@ sys.path.append(os.path.abspath('../'))
 from utility.general_utils import deleteRowCol
 
 
-def boxQP(H, g, lower, upper, x0):
+def boxQP(H, g, lower, upper, x0, options=[]):
     n = H.shape[0]
     clamped = np.zeros(n, dtype=bool)
     free = np.ones(n, dtype=bool)
@@ -20,12 +20,21 @@ def boxQP(H, g, lower, upper, x0):
     for e in y:
         if e == 0:
             x[e] = 0
-    maxIter = 100
-    minGrad = 1e-7
-    minRelImprove = 1e-7
-    stepDec = 0.6
-    minStep = 1e-22
-    Armijo = 0.1
+    if options == []:
+        maxIter = 100
+        minGrad = 1e-7
+        minRelImprove = 1e-7
+        stepDec = 0.6
+        minStep = 1e-22
+        Armijo = 0.1
+    else:
+        maxIter = options[0]
+        minGrad = options[1]
+        minRelImprove = options[2]
+        stepDec = options[3]
+        minStep = options[4]
+        Armijo = options[5]
+
     value = np.dot(x.T, g) + 0.5 * np.dot(x.T, np.dot(H, x))
 
     for it in range(maxIter):
@@ -58,6 +67,7 @@ def boxQP(H, g, lower, upper, x0):
         if factorize:
             H_free = deleteRowCol(H, clamped)
             Hfree = np.linalg.cholesky(H_free)
+            Hfree = Hfree.T
 
         gnorm = np.linalg.norm(grad[free])
         if gnorm < minGrad:
@@ -71,6 +81,7 @@ def boxQP(H, g, lower, upper, x0):
 
         sdotg = np.sum(search*grad)
         if sdotg >= 0:
+            print("sdotg")
             break
         step = 1
         nstep = 0
@@ -84,6 +95,9 @@ def boxQP(H, g, lower, upper, x0):
             if step<minStep:
                 result=2
                 break
+        if not options==[]:
+            print(it, vc, gnorm, oldvalue-vc, stepDec, nstep, sum(clamped))
+
         x = xc
         value = vc
     if it >= maxIter:
@@ -92,13 +106,12 @@ def boxQP(H, g, lower, upper, x0):
     return x, result, Hfree, free
 
 if __name__ == "__main__":
-    H = np.array([[1.02, 0.0], [0.0, 1.0002]])
-    g = np.array([0.0237, 0.0075])
-    lower = np.array([-0.6, -2.1])
-    upper = np.array([0.4, 1.9])
-    x0 = np.array([0, 0])
-    x, result, Hfree, free = boxQP(H, g, lower, upper, x0)
-    print(x)
-    print(result)
-    print(Hfree)
-    print(free)
+    options = [100, 1e-8, 1e-8, 0.6, 1e-22, 0.1]
+    n=3
+    g=np.ones(n)
+    H=np.array([[1,2,3],[2,5,5],[3,5,1]])
+    H=np.dot(H, H.T)
+    lower = -np.ones(n)
+    upper = np.ones(n)
+    x0 = 3*np.ones(n)
+    x,result,Hfree,free=boxQP(H,g,lower,upper,x0, options)

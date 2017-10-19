@@ -31,22 +31,38 @@ class iLQR(object):
         u = u0
         traj_list = self.forward_pass(self.agent.reset(), u, lims=self.agent.ctrl_lims)
         for it in range(self.maxIter):
+            #print('=========== iterations : {} ==========='.format(it))
             ### Step 1 : Forword step, differentiate dynamics and cost along new trajectory
             for traj in traj_list:
                 fx, fu, cx, cu, cxx, cxu, cuu = self.dynCstDiff(traj)
+            #print('===== x =====')
+            #print(traj_list[0]['state_list'][:,299])
+            #print('===== fx =====')
+            #print(fx[:,:,299])
+            #print('===== cu =====')
+            #print(cu[:,299])
             ### Step 2 : Backward pass, compute optimal control law and cost to go
             Vx, Vxx, l, L, dV = self.backward_pass(cx, cu, cxx,
                                                    cxu, cuu, fx, fu,
                                                    lamb, self.agent.ctrl_lims,
                                                    traj_list[0]['input_list'][:,:-1])
+            # import ipdb
+            # ipdb.set_trace()
+            #print('====== dV ======')
+            #print(dV)
+            #print('====== L ======')
+            #print(L[:,:,299])
             g_norm = np.mean(np.max(np.abs(l) \
                     / (np.abs(traj_list[0]['input_list'][:,:-1])+1), axis=0))
+            #print('===== gnorm ======')
+            #print(g_norm)
             if (g_norm < self.tolGrad) and (lamb < 1e-5):
                 dlamb = np.min(dlamb / self.lambdaFactor, 1 / self.lambdaFactor)
                 if lamb > self.lambdaMin:
                     lamb *= dlamb
                 else:
                     lamb = 0
+                #print("lamb : ", lamb, "gnorm : ", g_norm)
                 break
             ### Step 3 : Line-search to find new control sequence, trajectory, cost
             for alpha in self.alpha:
@@ -56,6 +72,10 @@ class iLQR(object):
                         self.agent.ctrl_lims)
                 dcost = np.sum(traj_list[0]['cost_list']-new_traj_list[0]['cost_list'])
                 expected = -alpha * (dV[0] + alpha * dV[1])
+                #print('===== dcost =====')
+                #print(dcost)
+                #print('===== alpha =====')
+                #print(alpha)
                 if expected > 0:
                     z = dcost / expected
                 else:
@@ -71,9 +91,12 @@ class iLQR(object):
                 lamb = 0
             traj_list = new_traj_list
             if dcost < self.tolFun:
+                # import ipdb
+                # ipdb.set_trace()
                 break
-            print("\riteration {}/{} -- cost {} -- reduction {}"\
-                    .format(it, self.maxIter, np.sum(traj_list[0]['cost_list']), dcost))
+            print("\riter {}/{} - cost {:.4f} - reduc {:.4f} - exp {:.4f} -- grad {:.4f} -- log10(lamb) {:.1f}"\
+                    .format(it, self.maxIter, np.sum(traj_list[0]['cost_list']), dcost,\
+                            expected, g_norm, np.log10(lamb)))
         return traj_list, L, Vx, Vxx
 
     def forward_pass(self, x0, policy, L=np.array([]),
@@ -147,6 +170,7 @@ class iLQR(object):
                     lamb * np.eye(self.agent.nu)
             if np.isnan(ctrl_lims).any():
                 L = np.linalg.cholesky(QuuF)
+                L = L.T
                 kK = -np.dot(np.linalg.inv(L), np.dot(np.linalg.inv(L.T), np.vstack([Qu, Qux_reg.T]).T))
                 k_i = kK[:,0]
                 K_i = kK[:,1:]
