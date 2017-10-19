@@ -42,9 +42,6 @@ def main():
 
     print(args.done)
 
-def sum(x):
-    return x[1:4]
-
 if __name__ == "__main__":
     main()
     print("Test Done")

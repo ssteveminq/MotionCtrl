@@ -31,38 +31,22 @@ class iLQR(object):
         u = u0
         traj_list = self.forward_pass(self.agent.reset(), u, lims=self.agent.ctrl_lims)
         for it in range(self.maxIter):
-            #print('=========== iterations : {} ==========='.format(it))
             ### Step 1 : Forword step, differentiate dynamics and cost along new trajectory
             for traj in traj_list:
                 fx, fu, cx, cu, cxx, cxu, cuu = self.dynCstDiff(traj)
-            #print('===== x =====')
-            #print(traj_list[0]['state_list'][:,299])
-            #print('===== fx =====')
-            #print(fx[:,:,299])
-            #print('===== cu =====')
-            #print(cu[:,299])
             ### Step 2 : Backward pass, compute optimal control law and cost to go
             Vx, Vxx, l, L, dV = self.backward_pass(cx, cu, cxx,
                                                    cxu, cuu, fx, fu,
                                                    lamb, self.agent.ctrl_lims,
                                                    traj_list[0]['input_list'][:,:-1])
-            # import ipdb
-            # ipdb.set_trace()
-            #print('====== dV ======')
-            #print(dV)
-            #print('====== L ======')
-            #print(L[:,:,299])
             g_norm = np.mean(np.max(np.abs(l) \
                     / (np.abs(traj_list[0]['input_list'][:,:-1])+1), axis=0))
-            #print('===== gnorm ======')
-            #print(g_norm)
             if (g_norm < self.tolGrad) and (lamb < 1e-5):
                 dlamb = np.min(dlamb / self.lambdaFactor, 1 / self.lambdaFactor)
                 if lamb > self.lambdaMin:
                     lamb *= dlamb
                 else:
                     lamb = 0
-                #print("lamb : ", lamb, "gnorm : ", g_norm)
                 break
             ### Step 3 : Line-search to find new control sequence, trajectory, cost
             for alpha in self.alpha:
@@ -72,10 +56,6 @@ class iLQR(object):
                         self.agent.ctrl_lims)
                 dcost = np.sum(traj_list[0]['cost_list']-new_traj_list[0]['cost_list'])
                 expected = -alpha * (dV[0] + alpha * dV[1])
-                #print('===== dcost =====')
-                #print(dcost)
-                #print('===== alpha =====')
-                #print(alpha)
                 if expected > 0:
                     z = dcost / expected
                 else:
@@ -91,8 +71,6 @@ class iLQR(object):
                 lamb = 0
             traj_list = new_traj_list
             if dcost < self.tolFun:
-                # import ipdb
-                # ipdb.set_trace()
                 break
             print("\riter {}/{} - cost {:.4f} - reduc {:.4f} - exp {:.4f} -- grad {:.4f} -- log10(lamb) {:.1f}"\
                     .format(it, self.maxIter, np.sum(traj_list[0]['cost_list']), dcost,\
@@ -261,31 +239,3 @@ class iLQR(object):
         cuu = J_cstcst[4:6, 4:6, :]
 
         return fx, fu, cx, cu, cxx, cxu, cuu
-
-    '''
-    def forward_pass2(self, x0, policy, noisy=False):
-        traj = []
-        state = np.zeros([self.agent.nx, self.params.iterations+1])
-        state[:, 0] = x0
-        cost = np.zeros(self.params.iterations+1)
-        if isinstance(policy, np.ndarray):
-            for i in range(self.params.num_samples):
-                if noisy:
-                    policy = generate_noise(policy)
-                u = np.zeros([self.agent.nu, self.params.iterations+1])
-                u[:, -1] = np.nan
-                u[:, :-1] = policy
-                for alpha in self.alpha:
-                    for t in range(self.params.iterations):
-                        state[:, t+1], cost[t], _ = self.agent.step(state[:, t], u[:, t])
-                    _, cost[-1], _ = self.agent.step(state[:,-1], u[:,-1])
-                    if not isDiverge(state, self.agent.thres):
-                        break
-                    if alpha == alpha[-1]:
-                        raise ValueError("Trajectory is Diverged")
-                traj.append({'state_list':state, 'input_list': u, 'cost_list':cost})
-        else:
-            pass
-        return traj
-    '''
-
