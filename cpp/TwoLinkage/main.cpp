@@ -1,49 +1,9 @@
 #include <dart/dart.hpp>
-#include <dart/gui/gui.hpp>
+#include "mywindow.hpp"
+#include "ControlSet/jpos_controller.hpp"
 
 using namespace dart::dynamics;
 using namespace dart::simulation;
-
-class MyWindow : public dart::gui::SimWindow {
-public:
-    MyWindow(WorldPtr world) {
-        setWorld(world);
-        mTwoLinkage = world->getSkeleton("twoLinkage");
-        assert(mTwoLinkage != nullptr);
-    }
-
-    void timeStepping() override {
-
-        // [Practice 3] : print out pos, vel in configuration space & operational space
-        //printProperties();
-
-        // [Practice 4] : controller test (jpos control, operational space control)
-        // [Practice 5] : apply external force
-
-        SimWindow::timeStepping();
-    }
-private:
-    SkeletonPtr mTwoLinkage;
-
-    void printProperties() {
-        std::cout << " ========= BodyNode Properties ========= "<< std::endl;
-        for (int i = 0; i < mTwoLinkage->getNumBodyNodes(); ++i) {
-            BodyNodePtr bn = mTwoLinkage->getBodyNode(i);
-            std::cout << "[Cartesian Pos] \n" <<
-                bn->getTransform().translation() << std::endl;
-            std::cout << "====================================" << std::endl;
-        }
-        for (int i = 0; i < mTwoLinkage->getNumBodyNodes(); ++i) {
-            std::cout << " ========= Joint Properties ========= "<< std::endl;
-            for (int i = 0; i < mTwoLinkage->getNumDofs(); ++i) {
-                DegreeOfFreedom* dof = mTwoLinkage->getDof(i);
-                std::cout << "[Pos] \n" << dof->getPosition() << std::endl;
-                std::cout << "[Vel] \n" << dof->getVelocity() << std::endl;
-                std::cout << "====================================" << std::endl;
-            }
-        }
-    }
-};
 
 void printModel(const SkeletonPtr& twoLinkage) {
     std::cout << " ========= BodyNode Properties ========= "<< std::endl;
@@ -82,7 +42,7 @@ void buildRobot(const SkeletonPtr& twoLinkage) {
     properties.mT_ParentBodyToJoint.translation() = Eigen::Vector3d(0, 0, 0);
     properties.mRestPositions[0] = 0.0;
     //properties.mSpringStiffnesses[0] = 0.0;
-    properties.mDampingCoefficients[0] = 15.0;
+    properties.mDampingCoefficients[0] = 5.0;
     // Create BodyNode pointer
     BodyNodePtr root_bn = twoLinkage->createJointAndBodyNodePair<RevoluteJoint>(
             nullptr, properties, BodyNode::AspectProperties("1")).second;
@@ -111,7 +71,7 @@ void buildRobot(const SkeletonPtr& twoLinkage) {
     properties.mT_ParentBodyToJoint.translation() = Eigen::Vector3d(0., 0., 1.);
     properties.mRestPositions[0] = 0.0;
     properties.mSpringStiffnesses[0] = 0.1;
-    properties.mDampingCoefficients[0] = 13.0;
+    properties.mDampingCoefficients[0] = 3.0;
     // Create BodyNode pointer
     BodyNodePtr bn = twoLinkage->createJointAndBodyNodePair<RevoluteJoint>(
             root_bn, properties, BodyNode::AspectProperties("2")).second;
@@ -145,25 +105,25 @@ int main(int argc, char *argv[])
     twoLinkage->getDof(1)->setPosition(30. * M_PI / 180.);
 
     // [Practice 2] : print out model (mass, joint stiffness, damping, jacobian, com)
-    printModel(twoLinkage);
+    //printModel(twoLinkage);
 
     //// Create a world and add the skeleton to the world
     WorldPtr world(new World);
     world->addSkeleton(twoLinkage);
 
     //// Create a window for rendering the world
-    MyWindow window(world);
+    // [Practice 4] : Controller
+    MyWindow window(new JPosController(twoLinkage));
     Eigen::Vector3d gravity(0.0, 0.0, -9.81);
     world->setGravity(gravity);
     world->setTimeStep(1.0/1000);
+    window.setWorld(world);
 
     // Initialize glut, initialize the window, and begin the glut event loop
     // TODO : Camera adjustment
     glutInit(&argc, argv);
     window.initWindow( 1280, 960, "Two Linkage Tutorial" );
     glutMainLoop();
-
-
 
     return 0;
 }
