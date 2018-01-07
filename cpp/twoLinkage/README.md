@@ -1,6 +1,7 @@
 # DART Two Linkage Manipulator Example
-- Assemble two linkage manipulator
-- Practice 1 : Initial position setting
-- Practice 2, 3 : APIs
-- Practice 4 : Controllers (Joint position and operational space)
+- Practice 0 : Assemble two linkage manipulator
+- Practice 1 : Set initial configuration
+- Practice 2 : APIs for model properties
+- Practice 3 : APIs for control
+- Practice 4 : Implement Controllers (Joint position and operational space)
 - Practice 5 : Apply external forces

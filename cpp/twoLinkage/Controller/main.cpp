@@ -13,11 +13,65 @@ public:
     }
 
     void timeStepping() override {
+
+        // [Practice 3] : print out pos, vel in configuration space & operational space
+        //printProperties();
+
+        // [Practice 4] : controller test (jpos control, operational space control)
+        // [Practice 5] : apply external force
+
         SimWindow::timeStepping();
     }
 private:
     SkeletonPtr mTwoLinkage;
+
+    void printProperties() {
+        std::cout << " ========= BodyNode Properties ========= "<< std::endl;
+        for (int i = 0; i < mTwoLinkage->getNumBodyNodes(); ++i) {
+            BodyNodePtr bn = mTwoLinkage->getBodyNode(i);
+            std::cout << "[Cartesian Pos] \n" <<
+                bn->getTransform().translation() << std::endl;
+            std::cout << "====================================" << std::endl;
+        }
+        for (int i = 0; i < mTwoLinkage->getNumBodyNodes(); ++i) {
+            std::cout << " ========= Joint Properties ========= "<< std::endl;
+            for (int i = 0; i < mTwoLinkage->getNumDofs(); ++i) {
+                DegreeOfFreedom* dof = mTwoLinkage->getDof(i);
+                std::cout << "[Pos] \n" << dof->getPosition() << std::endl;
+                std::cout << "[Vel] \n" << dof->getVelocity() << std::endl;
+                std::cout << "====================================" << std::endl;
+            }
+        }
+    }
 };
+
+void printModel(const SkeletonPtr& twoLinkage) {
+    std::cout << " ========= BodyNode Properties ========= "<< std::endl;
+    for (int i = 0; i < twoLinkage->getNumBodyNodes(); ++i) {
+        BodyNodePtr bn = twoLinkage->getBodyNode(i);
+        std::cout << "[Name] \n " << bn->getName() << std::endl;
+        std::cout << "[Mass] \n " << bn->getMass() << std::endl;
+        std::cout << "[CoM] \n " << bn->getCOM()  << std::endl;
+        std::cout << "[Linear Jacobian at BodyNode] \n " <<
+            bn->getLinearJacobian() << std::endl;
+        std::cout << "[Angular Jacobian at BodyNode] \n " <<
+            bn->getAngularJacobian() << std::endl;
+        std::cout << "[Linear Jacobian at CoM] \n " <<
+            bn->getLinearJacobian(Eigen::Vector3d(0., 0., 0.5)) << std::endl;
+        std::cout << "[Generalized Jacobian] \n" <<
+            bn->getJacobian(Frame::World()) << std::endl;
+        std::cout << "====================================" << std::endl;
+    }
+    std::cout << " ========= Joint Properties ========= "<< std::endl;
+    for (int i = 0; i < twoLinkage->getNumDofs(); ++i) {
+        DegreeOfFreedom* dof = twoLinkage->getDof(i);
+        std::cout << "[Name] \n" << dof->getName() << std::endl;
+        std::cout << "[Stiffness] \n " <<  dof->getSpringStiffness() << std::endl;
+        std::cout << "[Damping] \n " <<  dof->getDampingCoefficient() << std::endl;
+        std::cout << "====================================" << std::endl;
+    }
+
+}
 
 void buildRobot(const SkeletonPtr& twoLinkage) {
     //// Add root BodyNode
@@ -27,8 +81,8 @@ void buildRobot(const SkeletonPtr& twoLinkage) {
     properties.mAxis = Eigen::Vector3d::UnitY();
     properties.mT_ParentBodyToJoint.translation() = Eigen::Vector3d(0, 0, 0);
     properties.mRestPositions[0] = 0.0;
-    properties.mSpringStiffnesses[0] = 0.0;
-    properties.mDampingCoefficients[0] = 5.0;
+    //properties.mSpringStiffnesses[0] = 0.0;
+    properties.mDampingCoefficients[0] = 15.0;
     // Create BodyNode pointer
     BodyNodePtr root_bn = twoLinkage->createJointAndBodyNodePair<RevoluteJoint>(
             nullptr, properties, BodyNode::AspectProperties("1")).second;
@@ -56,8 +110,8 @@ void buildRobot(const SkeletonPtr& twoLinkage) {
     properties.mAxis = Eigen::Vector3d::UnitY();
     properties.mT_ParentBodyToJoint.translation() = Eigen::Vector3d(0., 0., 1.);
     properties.mRestPositions[0] = 0.0;
-    properties.mSpringStiffnesses[0] = 0.0;
-    properties.mDampingCoefficients[0] = 5.0;
+    properties.mSpringStiffnesses[0] = 0.1;
+    properties.mDampingCoefficients[0] = 13.0;
     // Create BodyNode pointer
     BodyNodePtr bn = twoLinkage->createJointAndBodyNodePair<RevoluteJoint>(
             root_bn, properties, BodyNode::AspectProperties("2")).second;
@@ -86,9 +140,12 @@ int main(int argc, char *argv[])
     //// Build Robot in skeleton
     buildRobot(twoLinkage);
 
-    // Practice 1 : change initial pos
+    // [Practice 1] : change initial pos
     twoLinkage->getDof(0)->setPosition(-30. * M_PI / 180.);
     twoLinkage->getDof(1)->setPosition(30. * M_PI / 180.);
+
+    // [Practice 2] : print out model (mass, joint stiffness, damping, jacobian, com)
+    printModel(twoLinkage);
 
     //// Create a world and add the skeleton to the world
     WorldPtr world(new World);
@@ -101,16 +158,11 @@ int main(int argc, char *argv[])
     world->setTimeStep(1.0/1000);
 
     // Initialize glut, initialize the window, and begin the glut event loop
+    // TODO : Camera adjustment
     glutInit(&argc, argv);
     window.initWindow( 1280, 960, "Two Linkage Tutorial" );
     glutMainLoop();
 
-    //// Create window
-    // Practice 2 : print out model properties (mass, joint stiffness, damping,
-    //                                          jacobian, com)
-    // Practice 3 : print out pos, vel in configuration space & operational space
-    // Practice 4 : apply force (controller e.g. jpos control, operational space control)
-    // Practice 5 : apply body force
 
 
     return 0;
