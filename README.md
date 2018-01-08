@@ -1,2 +1,2 @@
 # MotionCtrl
-This repo is to compare performance of classic controller and policy learned from RL
+This repo is to test simple planning & control algorithm in DART.
