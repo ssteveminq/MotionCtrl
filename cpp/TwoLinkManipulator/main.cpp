@@ -6,6 +6,7 @@ using namespace dart::dynamics;
 using namespace dart::simulation;
 
 void printModel(const SkeletonPtr& twoLinkage) {
+
     std::cout << " ========= BodyNode Properties ========= "<< std::endl;
     for (int i = 0; i < twoLinkage->getNumBodyNodes(); ++i) {
         BodyNodePtr bn = twoLinkage->getBodyNode(i);
