@@ -298,7 +298,7 @@ int main()
   viewer.simulate(true);
 
   // Add our custom event handler to the Viewer
-  viewer.addEventHandler(new ConstraintEventHandler(node->dnd));
+  //viewer.addEventHandler(new ConstraintEventHandler(node->dnd));
 
   // Print out instructions
   std::cout << viewer.getInstructions() << std::endl;
