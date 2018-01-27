@@ -42,8 +42,9 @@ void buildRobot(const SkeletonPtr& twoLinkage) {
     properties.mAxis = Eigen::Vector3d::UnitY();
     properties.mT_ParentBodyToJoint.translation() = Eigen::Vector3d(0, 0, 0);
     properties.mRestPositions[0] = 0.0;
-    //properties.mSpringStiffnesses[0] = 0.0;
-    properties.mDampingCoefficients[0] = 5.0;
+    properties.mSpringStiffnesses[0] = 0.0;
+    properties.mDampingCoefficients[0] = 0.0;
+    //properties.mDampingCoefficients[0] = 5.0;
     // Create BodyNode pointer
     BodyNodePtr root_bn = twoLinkage->createJointAndBodyNodePair<RevoluteJoint>(
             nullptr, properties, BodyNode::AspectProperties("1")).second;
@@ -71,8 +72,9 @@ void buildRobot(const SkeletonPtr& twoLinkage) {
     properties.mAxis = Eigen::Vector3d::UnitY();
     properties.mT_ParentBodyToJoint.translation() = Eigen::Vector3d(0., 0., 1.);
     properties.mRestPositions[0] = 0.0;
-    properties.mSpringStiffnesses[0] = 0.1;
-    properties.mDampingCoefficients[0] = 3.0;
+    properties.mSpringStiffnesses[0] = 0.0;
+    //properties.mDampingCoefficients[0] = 3.0;
+    properties.mDampingCoefficients[0] = 0.0;
     // Create BodyNode pointer
     BodyNodePtr bn = twoLinkage->createJointAndBodyNodePair<RevoluteJoint>(
             root_bn, properties, BodyNode::AspectProperties("2")).second;
@@ -115,7 +117,8 @@ int main(int argc, char *argv[])
     //// Create a window for rendering the world
     // [Practice 4] : Controller
     MyWindow window(new JPosController(twoLinkage));
-    Eigen::Vector3d gravity(0.0, 0.0, -9.81);
+    //Eigen::Vector3d gravity(0.0, 0.0, -9.81);
+    Eigen::Vector3d gravity(0.0, 0.0, 0.0);
     world->setGravity(gravity);
     world->setTimeStep(1.0/1000);
     window.setWorld(world);

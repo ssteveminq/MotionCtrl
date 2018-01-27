@@ -23,7 +23,7 @@
     </link>
 
     <joint name="ground_joint" type="floating">
-        <origin xyz="0 0 2.0" rpy="0 0 0" />
+        <origin xyz="0 0 0" rpy="0 0 0" />
         <parent link="world" />
         <child link="body" />
     </joint>
@@ -111,60 +111,60 @@
     </link>
 
 <!-- Foot Virtual Contact Point -->
-   <link name="FootOutFront">
-    <inertial>
-      <mass value="0.000000000001"/>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
-      <inertia ixx="1.0e-12" ixy="0.0" ixz="0.0" iyy="1.0e-12" iyz="0.0" izz="1.0e-12"/>
-    </inertial>
-  </link>
-  <joint name="foot_Offset1" type="fixed">
-    <origin rpy="0.0 0.0 0.0" xyz="0.135 0.04 -0.034"/>
-    <axis xyz="0 0 1"/>
-    <parent link="foot"/>
-    <child link="FootOutFront"/>
-  </joint>
+   <!--<link name="FootOutFront">-->
+    <!--<inertial>-->
+      <!--<mass value="0.000000000001"/>-->
+      <!--<origin rpy="0 0 0" xyz="0 0 0"/>-->
+      <!--<inertia ixx="1.0e-12" ixy="0.0" ixz="0.0" iyy="1.0e-12" iyz="0.0" izz="1.0e-12"/>-->
+    <!--</inertial>-->
+  <!--</link>-->
+  <!--<joint name="foot_Offset1" type="fixed">-->
+    <!--<origin rpy="0.0 0.0 0.0" xyz="0.135 0.04 -0.034"/>-->
+    <!--<axis xyz="0 0 1"/>-->
+    <!--<parent link="foot"/>-->
+    <!--<child link="FootOutFront"/>-->
+  <!--</joint>-->
 
-  <link name="FootOutBack">
-    <inertial>
-      <mass value="0.000000000001"/>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
-      <inertia ixx="1.0e-12" ixy="0.0" ixz="0.0" iyy="1.0e-12" iyz="0.0" izz="1.0e-12"/>
-    </inertial>
-  </link>
-  <joint name="foot_Offset2" type="fixed">
-    <origin rpy="0.0 0.0 0.0" xyz="-0.059 0.04 -0.034"/>
-    <axis xyz="0 0 1"/>
-    <parent link="foot"/>
-    <child link="FootOutBack"/>
-  </joint>
+  <!--<link name="FootOutBack">-->
+    <!--<inertial>-->
+      <!--<mass value="0.000000000001"/>-->
+      <!--<origin rpy="0 0 0" xyz="0 0 0"/>-->
+      <!--<inertia ixx="1.0e-12" ixy="0.0" ixz="0.0" iyy="1.0e-12" iyz="0.0" izz="1.0e-12"/>-->
+    <!--</inertial>-->
+  <!--</link>-->
+  <!--<joint name="foot_Offset2" type="fixed">-->
+    <!--<origin rpy="0.0 0.0 0.0" xyz="-0.059 0.04 -0.034"/>-->
+    <!--<axis xyz="0 0 1"/>-->
+    <!--<parent link="foot"/>-->
+    <!--<child link="FootOutBack"/>-->
+  <!--</joint>-->
 
-  <link name="FootInBack">
-    <inertial>
-      <mass value="0.000000000001"/>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
-      <inertia ixx="1.0e-12" ixy="0.0" ixz="0.0" iyy="1.0e-12" iyz="0.0" izz="1.0e-12"/>
-    </inertial>
-  </link>
-  <joint name="foot_Offset3" type="fixed">
-    <origin rpy="0.0 0.0 0.0" xyz="-0.059 -0.04 -0.034"/>
-    <axis xyz="0 0 1"/>
-    <parent link="foot"/>
-    <child link="FootInBack"/>
-  </joint>
+  <!--<link name="FootInBack">-->
+    <!--<inertial>-->
+      <!--<mass value="0.000000000001"/>-->
+      <!--<origin rpy="0 0 0" xyz="0 0 0"/>-->
+      <!--<inertia ixx="1.0e-12" ixy="0.0" ixz="0.0" iyy="1.0e-12" iyz="0.0" izz="1.0e-12"/>-->
+    <!--</inertial>-->
+  <!--</link>-->
+  <!--<joint name="foot_Offset3" type="fixed">-->
+    <!--<origin rpy="0.0 0.0 0.0" xyz="-0.059 -0.04 -0.034"/>-->
+    <!--<axis xyz="0 0 1"/>-->
+    <!--<parent link="foot"/>-->
+    <!--<child link="FootInBack"/>-->
+  <!--</joint>-->
 
-  <link name="FootInFront">
-    <inertial>
-      <mass value="0.000000000001"/>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
-      <inertia ixx="1.0e-12" ixy="0.0" ixz="0.0" iyy="1.0e-12" iyz="0.0" izz="1.0e-12"/>
-    </inertial>
-  </link>
-  <joint name="foot_Offset4" type="fixed">
-    <origin rpy="0.0 0.0 0.0" xyz="0.135 -0.04 -0.034"/>
-    <axis xyz="0 0 1"/>
-    <parent link="foot"/>
-    <child link="FootInFront"/>
-  </joint>
+  <!--<link name="FootInFront">-->
+    <!--<inertial>-->
+      <!--<mass value="0.000000000001"/>-->
+      <!--<origin rpy="0 0 0" xyz="0 0 0"/>-->
+      <!--<inertia ixx="1.0e-12" ixy="0.0" ixz="0.0" iyy="1.0e-12" iyz="0.0" izz="1.0e-12"/>-->
+    <!--</inertial>-->
+  <!--</link>-->
+  <!--<joint name="foot_Offset4" type="fixed">-->
+    <!--<origin rpy="0.0 0.0 0.0" xyz="0.135 -0.04 -0.034"/>-->
+    <!--<axis xyz="0 0 1"/>-->
+    <!--<parent link="foot"/>-->
+    <!--<child link="FootInFront"/>-->
+  <!--</joint>-->
 
 </robot>

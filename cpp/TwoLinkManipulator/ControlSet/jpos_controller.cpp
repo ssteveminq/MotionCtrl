@@ -34,4 +34,6 @@ void JPosController::_jPosCtrl() {
     Eigen::VectorXd Cg   = mSkeleton->getCoriolisAndGravityForces();
     mJPosTask->getCommand(cmd);
     mTorqueCommand = cmd + Cg;
+    //mTorqueCommand.setZero();
+    //mTorqueCommand[1] = 1.0;
 }

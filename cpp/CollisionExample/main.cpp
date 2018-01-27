@@ -20,6 +20,7 @@ void setMeshColor(dart::dynamics::SkeletonPtr robot) {
 }
 
 int main() {
+
     //// Generate world and add skeletons
     dart::simulation::WorldPtr world(new dart::simulation::World);
     dart::io::DartLoader urdfLoader;
@@ -54,4 +55,5 @@ int main() {
             ::osg::Vec3(-0.24, -0.25, 0.94));
     viewer.setCameraManipulator(viewer.getCameraManipulator());
     viewer.run();
+
 }

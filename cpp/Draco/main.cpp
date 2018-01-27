@@ -19,6 +19,34 @@ void setMeshColor(dart::dynamics::SkeletonPtr robot) {
     }
 }
 
+void _printModel(dart::dynamics::SkeletonPtr robot) {
+
+    //for (int i = 0; i < robot->getNumBodyNodes(); ++i) {
+        //dart::dynamics::BodyNodePtr bn = robot->getBodyNode(i);
+        //std::cout << i << "th" << std::endl;
+        //std::cout << bn->getName() << std::endl;
+    //}
+
+    //for (int i = 0; i < robot->getNumJoints(); ++i) {
+        //dart::dynamics::Joint* joint = robot->getJoint(i);
+        //std::cout << i << "th" << std::endl;
+        //std::cout << joint->getNumDofs() << std::endl;
+    //}
+
+    //for (int i = 0; i < robot->getNumDofs(); ++i) {
+        //dart::dynamics::DegreeOfFreedom* dof = robot->getDof(i);
+        //std::cout << i << "th" << std::endl;
+        //std::cout << dof->getName() << std::endl;
+    //}
+
+    std::cout << robot->getNumDofs() << std::endl;
+    std::cout << robot->getNumJoints() << std::endl;
+    std::cout << robot->getMassMatrix().rows() << std::endl;
+    std::cout << robot->getMassMatrix().cols() << std::endl;
+
+    exit(0);
+}
+
 int main() {
     //// Generate world and add skeletons
     dart::simulation::WorldPtr world(new dart::simulation::World);
@@ -27,13 +55,17 @@ int main() {
             "/Users/junhyeok/Repository/MotionCtrl/cpp/Draco/RobotModel/ground.urdf");
     dart::dynamics::SkeletonPtr robot = urdfLoader.parseSkeleton(
             "/Users/junhyeok/Repository/MotionCtrl/cpp/Draco/RobotModel/draco.urdf");
-    world->addSkeleton(ground);
+    //world->addSkeleton(ground);
     world->addSkeleton(robot);
-    Eigen::Vector3d gravity(0.0, 0.0, -9.81);
+    //Eigen::Vector3d gravity(0.0, 0.0, -9.81);
+    Eigen::Vector3d gravity(0.0, 0.0, 0.0);
     world->setGravity(gravity);
     world->setTimeStep(1.0/1000);
 
     // Initial configuration
+
+    // Print Information
+    _printModel(robot);
 
     // Set mesh color
     setMeshColor(robot);
