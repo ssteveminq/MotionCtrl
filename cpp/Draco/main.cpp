@@ -21,6 +21,8 @@ void setMeshColor(dart::dynamics::SkeletonPtr robot) {
 
 void _printModel(dart::dynamics::SkeletonPtr robot) {
 
+    std::cout<<"MK code added test"<<std::endl;
+
     //for (int i = 0; i < robot->getNumBodyNodes(); ++i) {
         //dart::dynamics::BodyNodePtr bn = robot->getBodyNode(i);
         //std::cout << i << "th" << std::endl;
@@ -44,7 +46,7 @@ void _printModel(dart::dynamics::SkeletonPtr robot) {
     std::cout << robot->getMassMatrix().rows() << std::endl;
     std::cout << robot->getMassMatrix().cols() << std::endl;
 
-    exit(0);
+    //exit(0);
 }
 
 int main() {
@@ -52,9 +54,11 @@ int main() {
     dart::simulation::WorldPtr world(new dart::simulation::World);
     dart::io::DartLoader urdfLoader;
     dart::dynamics::SkeletonPtr ground = urdfLoader.parseSkeleton(
-            "/Users/junhyeok/Repository/MotionCtrl/cpp/Draco/RobotModel/ground.urdf");
+            //"/Users/junhyeok/Repository/MotionCtrl/cpp/Draco/RobotModel/ground.urdf");
+            "/Users/SSUN/workspace/MotionCtrl/cpp/Draco/RobotModel/ground.urdf");
     dart::dynamics::SkeletonPtr robot = urdfLoader.parseSkeleton(
-            "/Users/junhyeok/Repository/MotionCtrl/cpp/Draco/RobotModel/draco.urdf");
+            //"/Users/junhyeok/Repository/MotionCtrl/cpp/Draco/RobotModel/draco.urdf");
+            "/Users/SSUN/workspace/MotionCtrl/cpp/Draco/RobotModel/draco.urdf");
     //world->addSkeleton(ground);
     world->addSkeleton(robot);
     //Eigen::Vector3d gravity(0.0, 0.0, -9.81);
