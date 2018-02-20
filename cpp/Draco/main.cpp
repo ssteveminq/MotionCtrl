@@ -53,9 +53,35 @@ void _printModel(dart::dynamics::SkeletonPtr robot) {
     std::cout << robot->getNumJoints() << std::endl;
     std::cout << robot->getMassMatrix().rows() << std::endl;
     std::cout << robot->getMassMatrix().cols() << std::endl;
-
     //exit(0);
 }
+
+void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
+    Eigen::VectorXd q(robot->getNumDofs());
+    q.setZero();
+
+    int num_joints=3;
+    q[0] =0.000;
+
+    Eigen::VectorXd idx_joint(num_joints);
+    // lower body
+    idx_joint[0] = robot->getDof("bodyPitch")->getIndexInSkeleton();
+    idx_joint[1] = robot->getDof("kneePitch")->getIndexInSkeleton();
+    idx_joint[2] = robot->getDof("ankle")->getIndexInSkeleton();
+    //idx_joint[5] = robot->getDof("rightAnklePitch")->getIndexInSkeleton();
+
+    // upper body
+    Eigen::VectorXd config_joint(num_joints);
+    config_joint << -0.5, -0.6, 0.6;
+
+    for(int i(0); i<num_joints; i++)
+        q[idx_joint[i]] = config_joint[i];    
+
+    robot->setPositions(q);
+}
+
+
+
 
 int main() {
 
@@ -69,17 +95,28 @@ int main() {
     //// Generate world and add skeletons
     dart::simulation::WorldPtr world(new dart::simulation::World);
     dart::io::DartLoader urdfLoader;
-    dart::dynamics::SkeletonPtr ground = urdfLoader.parseSkeleton(model_path.c_str());
-    dart::dynamics::SkeletonPtr robot = urdfLoader.parseSkeleton(robotmodel_path.c_str());
+//<<<<<<< HEAD
+    //dart::dynamics::SkeletonPtr ground = urdfLoader.parseSkeleton(model_path.c_str());
+    //dart::dynamics::SkeletonPtr robot = urdfLoader.parseSkeleton(robotmodel_path.c_str());
     //world->addSkeleton(ground);
+//=======
+    dart::dynamics::SkeletonPtr ground = urdfLoader.parseSkeleton(
+            //"/Users/junhyeok/Repository/MotionCtrl/cpp/Draco/RobotModel/ground.urdf");
+            "/Users/SSUN/workspace/MotionCtrl/cpp/Draco/RobotModel/ground.urdf");
+    dart::dynamics::SkeletonPtr robot = urdfLoader.parseSkeleton(
+            //"/Users/junhyeok/Repository/MotionCtrl/cpp/Draco/RobotModel/draco.urdf");
+            "/Users/SSUN/workspace/MotionCtrl/cpp/Draco/RobotModel/mk_draco.urdf");
+    world->addSkeleton(ground);
+//>>>>>>> 42c6cc4d63e4ed11b48061b66915c6152cb3ffe6
     world->addSkeleton(robot);
-    //Eigen::Vector3d gravity(0.0, 0.0, -9.81);
-    Eigen::Vector3d gravity(0.0, 0.0, 0.0);
+    Eigen::Vector3d gravity(0.0, 0.0, -9.81);
+    //Eigen::Vector3d gravity(0.0, 0.0, 0.0);
     world->setGravity(gravity);
     world->setTimeStep(1.0/1000);
 
     // Initial configuration
 
+    _setInitialConfiguration(robot);
     // Print Information
     _printModel(robot);
 
@@ -94,12 +131,14 @@ int main() {
     //// Create viewer
     dart::gui::osg::Viewer viewer;
     viewer.addWorldNode(node);
-    viewer.simulate(true);
+    viewer.simulate(false);
     std::cout << viewer.getInstructions() << std::endl;
     viewer.setUpViewInWindow(0, 0, 640, 480);
-    viewer.getCameraManipulator()->setHomePosition(::osg::Vec3( 2.57,  3.14, 1.64),
+    //viewer.getCameraManipulator()->setHomePosition(::osg::Vec3( 2.57,  3.14, 1.64),
+    //viewer.getCameraManipulator()->setHomePosition(::osg::Vec3( 4.57,  5.14, 2.04),
+    viewer.getCameraManipulator()->setHomePosition(::osg::Vec3( 0.57,  5.14, 2.04),
             ::osg::Vec3( 0.00,  0.00, 0.00),
-            ::osg::Vec3(-0.24, -0.25, 0.94));
+            ::osg::Vec3(-0.55, -0.55, 0.95));
     viewer.setCameraManipulator(viewer.getCameraManipulator());
     viewer.run();
 }
