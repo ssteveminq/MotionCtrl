@@ -55,10 +55,10 @@ int main() {
     dart::io::DartLoader urdfLoader;
     dart::dynamics::SkeletonPtr ground = urdfLoader.parseSkeleton(
             //"/Users/junhyeok/Repository/MotionCtrl/cpp/Draco/RobotModel/ground.urdf");
-            "/Users/SSUN/workspace/MotionCtrl/cpp/Draco/RobotModel/ground.urdf");
+            "/home/mk/loco/MotionCtrl/cpp/Draco/RobotModel/ground.urdf");
     dart::dynamics::SkeletonPtr robot = urdfLoader.parseSkeleton(
             //"/Users/junhyeok/Repository/MotionCtrl/cpp/Draco/RobotModel/draco.urdf");
-            "/Users/SSUN/workspace/MotionCtrl/cpp/Draco/RobotModel/draco.urdf");
+            "/home/mk/loco/MotionCtrl/cpp/Draco/RobotModel/draco.urdf");
     //world->addSkeleton(ground);
     world->addSkeleton(robot);
     //Eigen::Vector3d gravity(0.0, 0.0, -9.81);
