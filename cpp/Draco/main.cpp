@@ -2,8 +2,18 @@
 #include <dart/gui/osg/osg.hpp>
 #include <dart/io/io.hpp>
 #include <dart/io/urdf/urdf.hpp>
-
+#include <stdio.h>
+#include <iostream>
+#include <string>
 #include "draco_worldnode.hpp"
+
+std::string GetCurrentWorkingDir(void)
+{
+    char buff[50];
+    getcwd(buff,50);
+    std::string current_working_dir(buff);
+    return current_working_dir;
+}
 
 void setMeshColor(dart::dynamics::SkeletonPtr robot) {
     for(std::size_t i=0; i<robot->getNumBodyNodes(); ++i) {
@@ -20,8 +30,6 @@ void setMeshColor(dart::dynamics::SkeletonPtr robot) {
 }
 
 void _printModel(dart::dynamics::SkeletonPtr robot) {
-
-    std::cout<<"MK code added test"<<std::endl;
 
     //for (int i = 0; i < robot->getNumBodyNodes(); ++i) {
         //dart::dynamics::BodyNodePtr bn = robot->getBodyNode(i);
@@ -50,15 +58,19 @@ void _printModel(dart::dynamics::SkeletonPtr robot) {
 }
 
 int main() {
+
+    /// getDirectory location of model file
+    std::string current_path = GetCurrentWorkingDir(); 
+    // remove "build" string from current path
+    current_path = current_path.substr(0,current_path.find_last_of("\\/"));
+    std::string model_path=current_path +"/RobotModel/ground.urdf";
+    std::string robotmodel_path=current_path+"/RobotModel/draco.urdf";
+
     //// Generate world and add skeletons
     dart::simulation::WorldPtr world(new dart::simulation::World);
     dart::io::DartLoader urdfLoader;
-    dart::dynamics::SkeletonPtr ground = urdfLoader.parseSkeleton(
-            //"/Users/junhyeok/Repository/MotionCtrl/cpp/Draco/RobotModel/ground.urdf");
-            "/Users/SSUN/workspace/MotionCtrl/cpp/Draco/RobotModel/ground.urdf");
-    dart::dynamics::SkeletonPtr robot = urdfLoader.parseSkeleton(
-            //"/Users/junhyeok/Repository/MotionCtrl/cpp/Draco/RobotModel/draco.urdf");
-            "/Users/SSUN/workspace/MotionCtrl/cpp/Draco/RobotModel/draco.urdf");
+    dart::dynamics::SkeletonPtr ground = urdfLoader.parseSkeleton(model_path.c_str());
+    dart::dynamics::SkeletonPtr robot = urdfLoader.parseSkeleton(robotmodel_path.c_str());
     //world->addSkeleton(ground);
     world->addSkeleton(robot);
     //Eigen::Vector3d gravity(0.0, 0.0, -9.81);
