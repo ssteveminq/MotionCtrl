@@ -11,10 +11,10 @@
         </inertial>
         <visual>
             <!--<origin rpy="1.57 0 0" xyz = "-0.27 0.139 -0.115"/>-->
-            <!--<origin rpy="1.57 0 0" xyz = "-0.27 0.34 -0.115"/>-->
-            <origin rpy="1.57 0 0" xyz = "-0.0 0.0 -0.0"/>
+            <origin rpy="1.57 0 0" xyz = "-0.27 0.34 -0.115"/>
+            <!--<origin rpy="1.57 0 0" xyz = "-0.0 0.0 -0.0"/>-->
             <geometry>
-                <mesh filename="meshes/body_mod.stl" scale="0.001 0.001 0.001"/>
+                <mesh filename="meshes/body_edit.stl" scale="0.001 0.001 0.001"/>
             </geometry>
         </visual>
         <!--<collision>-->
@@ -32,7 +32,6 @@
     </joint>
 
     <joint name="bodyPitch" type="continuous">
-        <!--<origin rpy="0.0 0.0 0.0" xyz="0.007 -0.007 -0.115"/>-->
         <origin rpy="0.0 0.0 0.0" xyz="0.007 -0.007 -0.115"/>
         <!--<origin rpy="0.0 0.0 0.0" xyz="0.007 -0.115 0.007"/>-->
         <axis xyz="0 1 0"/>
@@ -43,14 +42,13 @@
     <link name="upperLeg">
         <inertial>
             <origin rpy="0 0 0" xyz="0.0000 0 -0.0000"/>
-            <!--<origin rpy="0 0 0" xyz="0.061 0 0.3473"/>-->
             <!--<origin rpy="0 0 0" xyz="0.0061 0 -0.0"/>-->
             <mass value="5.4818"/>
             <inertia ixx="0.0777" ixy="-0.0001" ixz="-0.0005" iyy="0.0761" iyz="0.0084" izz="0.0061"/>
         </inertial>
         <visual>
-            <!--<origin rpy="0 3.14 -1.57" xyz="0.002473 -0.000 0.003"/>-->
-            <origin rpy="0 3.14 -1.57" xyz="0.29 -0.3200 0.1573"/>
+            <origin rpy="0 3.14 -1.57" xyz="-0.0000 -0.000 -0.00"/>
+            <!--<origin rpy="0 3.14 -1.57" xyz="-0.0005 -0.000 -0.00"/>-->
             <!--<origin rpy="0 0 0" xyz="0.0061 0 -0.2473"/>-->
             <geometry>
                 <mesh filename="meshes/upperLeg_edit.stl" scale="0.001 0.001 0.001"/>
@@ -65,6 +63,8 @@
     </link>
 
     <joint name="kneePitch" type="continuous">
+        <!--<origin rpy="0.0 0.0 0.0" xyz="0 -0.00 -0.494"/>-->
+        <!--<origin rpy="0.0 0.0 0.0" xyz="0.148 0.038 -0.54"/>-->
         <origin rpy="0.0 0.0 0.0" xyz="0.188 0.038 -0.49"/>
         <axis xyz="0 1 0"/>
         <parent link="upperLeg"/>
@@ -74,18 +74,28 @@
     <link name="lowerLeg">
         <inertial>
             <origin rpy="0 0 0" xyz="-0.0000 -0.00 -0.000"/>
+            <!--<origin rpy="0 0 0" xyz="-0.0038 -0.0022 -0.2647"/>-->
             <mass value="3.7701"/>
             <inertia ixx="0.0777" ixy="-0.0001" ixz="-0.0005" iyy="0.0761" iyz="0.0084" izz="0.0061"/>
         </inertial>
         <visual>
-            <origin rpy="0 0 -1.57" xyz="0.1515 -0.325 -0.1647"/>
+            <!--<origin rpy="0 0 -1.57" xyz="-0.075 0.05 -0.5130"/>-->
+            <origin rpy="0 0 -1.57" xyz="-0.068 -0.00 -0.2647"/>
+            <!--<origin rpy="0 0 -1.57" xyz="-0.075 0.0 -0.00"/>-->
             <geometry>
                 <mesh filename="meshes/lowerLeg_edit.stl" scale="0.001 0.001 0.001"/>
             </geometry>
         </visual>
+        <!--<collision>-->
+            <!--<origin rpy="0 0 -1.57" xyz="-0.075 0.05 -0.513"/>-->
+            <!--<geometry>-->
+                <!--<mesh filename="meshes/lowerLeg.STL" scale="0.001 0.001 0.001"/>-->
+            <!--</geometry>-->
+        <!--</collision>-->
     </link>
 
     <joint name="ankle" type="continuous">
+        <!--<origin rpy="0.0 0.0 0.0" xyz="0 0 -0.15"/>-->
         <origin rpy="0.0 0.0 0.0" xyz="0 0.0 -0.36"/>
         <axis xyz="0 1 0"/>
         <parent link="lowerLeg"/>
@@ -94,18 +104,21 @@
 
     <link name="foot">
         <inertial>
+            <!--<origin rpy="0 0 0" xyz="0.0183 0 -0.0232"/>-->
             <origin rpy="0 0 0" xyz="0.0 0 -0.0"/>
             <mass value="0.6817573"/>
             <inertia ixx="0.001766" ixy="-0.0000003" ixz="0.0000006" iyy="0.0020957" iyz="-0.0001134" izz="0.0004916"/>
         </inertial>
         <visual>
-            <origin rpy="1.57 0 1.57" xyz="0.1483 -0.32 0.05972"/>
+            <origin rpy="1.57 0 1.57" xyz="-0.0183 -0.0 -0.0232"/>
             <geometry>
                 <mesh filename="meshes/foot_edit.stl" scale="0.001 0.001 0.001"/>
             </geometry>
         </visual>
         <collision>
-            <origin rpy="1.57 0 1.57" xyz="0.1483 -0.32 0.0597"/>
+            <!--<origin rpy="1.57 0 1.57" xyz="-0.07 -0.05 -0.03"/>-->
+            <!--<origin rpy="1.57 0 1.57" xyz="-0.0061 -0.0 -0.24"/>-->
+            <origin rpy="1.57 0 1.57" xyz="-0.0183 -0.0 -0.0232"/>
             <geometry>
                 <mesh filename="meshes/foot_edit.stl" scale="0.001 0.001 0.001"/>
             </geometry>

@@ -1,7 +1,8 @@
 #include <dart/dart.hpp>
 #include <dart/gui/osg/osg.hpp>
-#include <dart/io/io.hpp>
-#include <dart/io/urdf/urdf.hpp>
+//#include <dart/gui/osg/osg.hpp>
+#include <dart/utils/utils.hpp>
+#include <dart/utils/urdf/urdf.hpp>
 #include <stdio.h>
 #include <iostream>
 #include <string>
@@ -64,15 +65,14 @@ void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
     q[0] =0.000;
 
     Eigen::VectorXd idx_joint(num_joints);
-    // lower body
+     //lower body
     idx_joint[0] = robot->getDof("bodyPitch")->getIndexInSkeleton();
     idx_joint[1] = robot->getDof("kneePitch")->getIndexInSkeleton();
     idx_joint[2] = robot->getDof("ankle")->getIndexInSkeleton();
-    //idx_joint[5] = robot->getDof("rightAnklePitch")->getIndexInSkeleton();
 
-    // upper body
+     //upper body
     Eigen::VectorXd config_joint(num_joints);
-    config_joint << -0.5, -0.6, 0.6;
+    config_joint << 0.2, -0.1, 1.5;
 
     for(int i(0); i<num_joints; i++)
         q[idx_joint[i]] = config_joint[i];    
@@ -81,41 +81,31 @@ void _setInitialConfiguration(dart::dynamics::SkeletonPtr robot) {
 }
 
 
-
-
 int main() {
 
     /// getDirectory location of model file
     std::string current_path = GetCurrentWorkingDir(); 
     // remove "build" string from current path
     current_path = current_path.substr(0,current_path.find_last_of("\\/"));
-    std::string model_path=current_path +"/RobotModel/ground.urdf";
-    std::string robotmodel_path=current_path+"/RobotModel/draco.urdf";
+    //std::string model_path=current_path +"/RobotModel/ground.urdf";
+    //std::string robotmodel_path=current_path+"/RobotModel/draco.urdf";
 
     //// Generate world and add skeletons
     dart::simulation::WorldPtr world(new dart::simulation::World);
-    dart::io::DartLoader urdfLoader;
-//<<<<<<< HEAD
-    //dart::dynamics::SkeletonPtr ground = urdfLoader.parseSkeleton(model_path.c_str());
-    //dart::dynamics::SkeletonPtr robot = urdfLoader.parseSkeleton(robotmodel_path.c_str());
-    //world->addSkeleton(ground);
-//=======
-    dart::dynamics::SkeletonPtr ground = urdfLoader.parseSkeleton(
-            //"/Users/junhyeok/Repository/MotionCtrl/cpp/Draco/RobotModel/ground.urdf");
-            "/Users/SSUN/workspace/MotionCtrl/cpp/Draco/RobotModel/ground.urdf");
-    dart::dynamics::SkeletonPtr robot = urdfLoader.parseSkeleton(
-            //"/Users/junhyeok/Repository/MotionCtrl/cpp/Draco/RobotModel/draco.urdf");
-            "/Users/SSUN/workspace/MotionCtrl/cpp/Draco/RobotModel/mk_draco.urdf");
+    //dart::io::DartLoader urdfLoader;
+    dart::utils::DartLoader urdfLoader;
+
+    //dart::dynamics::SkeletonPtr ground = urdfLoader.parseSkeleton(
+    auto ground = urdfLoader.parseSkeleton("/home/mk/MotionCtrl/cpp/Draco/RobotModel/ground.urdf");
+    auto robot= urdfLoader.parseSkeleton("/home/mk/MotionCtrl/cpp/Draco/RobotModel/mk_draco.urdf");
     world->addSkeleton(ground);
-//>>>>>>> 42c6cc4d63e4ed11b48061b66915c6152cb3ffe6
     world->addSkeleton(robot);
     Eigen::Vector3d gravity(0.0, 0.0, -9.81);
-    //Eigen::Vector3d gravity(0.0, 0.0, 0.0);
+
     world->setGravity(gravity);
     world->setTimeStep(1.0/1000);
 
     // Initial configuration
-
     _setInitialConfiguration(robot);
     // Print Information
     _printModel(robot);
